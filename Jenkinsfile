@@ -1,32 +1,41 @@
-pipeline {  
-    environment {
-      registry = "osanamgcj/mobead_image_build"
-      registryCredential = 'dockerhub'
-      dockerImage = ''
+pipeline {
+    agent any
+
+    stages {
+        stage('Build') {
+            steps {
+                sh 'docker build -t mobead-app-dev .'
+            }
+        }
+
+        stage('Testes') {
+            steps {
+                sh 'docker run mobead-app-dev npm test'
+            }
+        }
+
+        stage('SonarQube') {
+            steps {
+                sh 'sonar-scanner'
+            }
+        }
+
+        stage('Deploy Dev') {
+            steps {
+                sh './deploy-dev.sh'
+            }
+        }
+
+        stage('Aprovação para Produção') {
+            steps {
+                input 'Liberar deploy para produção?'
+            }
+        }
+
+        stage('Deploy Prod') {
+            steps {
+                sh './deploy-prod.sh'
+            }
+        }
     }
-    agent any 
-    stages { 
-        stage('Lint Dockerfile'){ 
-            steps{
-                echo "Pipeline Usando Jenkinsfile"
-                sh 'docker run --rm -i hadolint/hadolint < Dockerfile'
-            }
-        }
-        stage('Build image') {
-            steps{
-                script {
-                    dockerImage = docker.build registry + ":$BUILD_NUMBER"
-                }
-            }
-        }
-        stage('Delivery image') {
-            steps{
-                script {
-                  docker.withRegistry('https://registry-1.docker.io/v2/', 'dockerhub') {
-                   dockerImage.push("$BUILD_NUMBER")
-                  }
-                }
-            }
-        }
-    } 
 }
