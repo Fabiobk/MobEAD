@@ -1,3 +1,5 @@
+// Atualização para rodar pipeline sem lint
+
 pipeline {
     agent any
 
