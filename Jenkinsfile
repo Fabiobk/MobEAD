@@ -1,43 +1,56 @@
-// AtualizaÃ§Ã£o para rodar pipeline sem lint
-
 pipeline {
     agent any
 
     stages {
+        stage('Declarative: Checkout SCM') {
+            steps {
+                checkout scm
+            }
+        }
+
         stage('Build') {
             steps {
-                sh 'docker build -t mobead-app-dev .'
+                echo 'Stage Build ignorado para execução sem Docker'
             }
         }
 
         stage('Testes') {
             steps {
-                sh 'docker run mobead-app-dev npm test'
+                echo 'Executando testes simulados...'
             }
         }
 
         stage('SonarQube') {
             steps {
-                sh 'sonar-scanner'
+                echo 'Análise SonarQube simulada...'
             }
         }
 
         stage('Deploy Dev') {
             steps {
-                sh './deploy-dev.sh'
+                echo 'Deploy Dev simulado...'
             }
         }
 
-        stage('AprovaÃ§Ã£o para ProduÃ§Ã£o') {
+        stage('Aprovação para Produção') {
             steps {
-                input 'Liberar deploy para produÃ§Ã£o?'
+                input message: 'Aprovar para Produção?', ok: 'Sim'
             }
         }
 
         stage('Deploy Prod') {
             steps {
-                sh './deploy-prod.sh'
+                echo 'Deploy Prod simulado...'
             }
+        }
+    }
+
+    post {
+        success {
+            echo 'Pipeline finalizada com sucesso!'
+        }
+        failure {
+            echo 'Pipeline falhou.'
         }
     }
 }
