@@ -5,25 +5,26 @@ pool:
   name: Default
 
 variables:
+  solution: '**/*.sln'
+  buildPlatform: 'Any CPU'
   buildConfiguration: 'Release'
 
 steps:
+- checkout: self
 
-- task: UseDotNet@2
+- task: NuGetToolInstaller@1
+
+- task: NuGetCommand@2
   inputs:
-    packageType: 'sdk'
-    version: '8.x'
+    restoreSolution: '$(solution)'
 
-- script: dotnet restore
-  displayName: 'Restore packages'
-
-- script: dotnet build --configuration $(buildConfiguration)
-  displayName: 'Build solution'
-
-- script: dotnet test --configuration $(buildConfiguration) --no-build
-  displayName: 'Run tests'
-
-- task: PublishPipelineArtifact@1
+- task: VSBuild@1
   inputs:
-    targetPath: '$(System.DefaultWorkingDirectory)'
-    artifact: 'drop'
+    solution: '$(solution)'
+    platform: '$(buildPlatform)'
+    configuration: '$(buildConfiguration)'
+
+- task: VSTest@2
+  inputs:
+    platform: '$(buildPlatform)'
+    configuration: '$(buildConfiguration)'
